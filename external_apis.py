@@ -36,3 +36,24 @@ def get_artist_image_from_bbm(artist_name, size="original"):
     search_results = json.load(urllib2.urlopen(url=simple_search_template.format(search_url=BBM_SEARCH_URL, query=urllib2.quote(artist_name), sizes=size)))
     return search_results['artists'][0]['images'][size] if len(search_results['artists']) == 1 else ''
 
+import urllib2
+import datetime
+
+def query_geo_stream_logs(artist_name, size=1000):
+    """ Query logstash for a given artist
+    """
+    # could have several days as in logstash-2014.03.25,logstash-2014.03.24
+    logstash_url = 'http://logs.blinkboxmusic.com:9200/logstash-{:%Y.%m.%d},logstash-{:%Y.%m.%d}/_search?pretty'.format(datetime.datetime.now(), datetime.datetime.now() - datetime.timedelta(days=1))
+    with open("logstash_query.json") as f:
+        logstash_query = json.load(f)
+
+    # currently does not use range
+    #now = datetime.datetime.utcnow()
+    #(now - datetime.datetime(1970, 1, 1)).total_seconds()
+    logstash_query['query']['filtered']['filter']['bool']['must'] = [{"exists": { "field": "geoip.location"}}]
+    # Replace artist filter in the template
+    logstash_query['query']['filtered']['query']['bool']['must'][0]['query_string']['query'] = u'stream_ARTIST_lookup.raw:"{artist_name}"'.format(artist_name=artist_name)
+    logstash_query['size'] = size
+    u = urllib2.urlopen(logstash_url, data=json.dumps(logstash_query))
+    logs = json.load(u.fp)
+    return (l['fields'] for l in logs['hits']['hits'])
