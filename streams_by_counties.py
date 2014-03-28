@@ -9,14 +9,7 @@ import shapely
 
 
 import external_apis
-logs = list(external_apis.query_geo_stream_logs('Portishead', size=1000))
-logs_points = [geometry.Point(l['geoip.location']) for l in logs]
-
-
 from shapely import geometry
-
-d = {"type": "Point", "coordinates": (0.0, 0.0)}
-geometry.asShape(d)
 
 with open("data/Map_UK_simp_raw.json") as f:
     counties = json.load(f)['features']
@@ -29,7 +22,7 @@ print "%i points for %i counties" % (get_number_of_points(counties_polygons), le
 def get_number_of_points(geometries):
     return sum(len(g.convex_hull.exterior.coords) for g in geometries if not g.is_empty)
 
-simplified_counties_polygons = [p.simplify(tolerance=0.1, preserve_topology=False) for p in counties_polygons]
+simplified_counties_polygons = [p.simplify(tolerance=0.05, preserve_topology=False) for p in counties_polygons]
 
 # 756 points for 192 counties
 print "%i points for %i counties" % (get_number_of_points(simplified_counties_polygons), len(simplified_counties_polygons))
@@ -46,30 +39,47 @@ counties_indexes = list(itertools.chain(*[[i for i, c in enumerate(simplified_co
 
 
 # Full workflow
-selected_artist_names = ["Mogwai", "Billy Connolly", "Belle and Sebastian", "Metronomy", "Portishead", "Travis", "Biffy Clyro", "Stereophonics", "Oasis", "Lamb", "The Smiths", "Atomic Kitten"]
+selected_artist_queries = [
+    {"artist":"Metronomy", "ndays":5}, {"artist":"Travis", "ndays":3}, {"artist":"Biffy Clyro", "ndays":2}, {"artist":"Stereophonics", "ndays":2}, {"artist":"Oasis", "ndays":2, "tag":"britpop"}, {"artist":"The Smiths", "ndays":3}, {"artist":"Atomic Kitten", "ndays":5}, {"artist":"Tom Jones", "ndays":5}, {"artist":"Dizzee Rascal", "ndays":2}, {"artist":"Ed Sheeran", "ndays":1}, {"artist":"Radiohead", "ndays":3}, {"artist":"The Animals", "ndays":10}]
 
-counties_indexes_per_artists = []
-for name in selected_artist_names:
-    print name
-    logs = list(external_apis.query_geo_stream_logs(name, size=100000))
-    logs_points = [geometry.Point(l['geoip.location']) for l in logs]
 
+raw_logs_per_artists = []
+for query in selected_artist_queries:
+    print query
+    logs = list(external_apis.query_geo_stream_logs(query['artist'], size=100000, ndays=query['ndays']))
+    raw_logs_per_artists.append(logs)
     print "%i logs fetched from artist" % (len(logs), )
 
+
+import pickle
+with open("data/raw_logs_per_artists.pck", "w") as f:
+    pickle.dump(raw_logs_per_artists, f)
+
+counties_indexes_per_artists = []
+
+for query, logs in zip(selected_artist_queries, raw_logs_per_artists):
+    print query
+    logs_points = [geometry.Point(l['geoip.location']) for l in logs]
     counties_indexes = list(itertools.chain(*[[i for i, c in enumerate(simplified_counties_polygons) if l.within(c)] for l in logs_points]))
     counties_indexes_per_artists.append(counties_indexes)
 
-with open("data/counties_indexes_per_artists.json", "w") as f:
-    json.dump(counties_indexes_per_artists, f)
 
+import numpy as np
+artist_county_counts = np.array([np.bincount(indexes) for indexes in counties_indexes_per_artists])
+
+artist_national_percents = 100 * artist_county_counts.sum(axis=1, dtype=np.float) / artist_county_counts.sum()
+county_grand_total = artist_county_counts.sum(axis=0, dtype=np.float)
+artist_county_local_percents = 100 * (artist_county_counts / county_grand_total)
+
+artist_county_deviations_percents = (artist_county_local_percents.T - artist_national_percents).T
 
 decorated_counties = [c.copy() for c in counties]
 for c in decorated_counties:
     c['properties'] = { 'name': c['properties']['NAME_2']}
 
-for artist_name, counties_indexes in itertools.izip(selected_artist_names, counties_indexes_per_artists):
-    for i, count in enumerate(np.bincount(counties_indexes)):
-        decorated_counties[i]['properties'][artist_name] = count
+for artist_name, counties_values in itertools.izip(selected_artist_names, artist_county_deviations_percents.tolist()):
+    for i, value in enumerate(counties_values):
+        decorated_counties[i]['properties'][artist_name] = value
     
 
 with open("data/artist_by_counties.json", "w") as f:

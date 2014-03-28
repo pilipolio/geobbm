@@ -23,30 +23,17 @@
 	<script src="js/leaflet.js"></script>
     <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
+    
+    <!-- <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.2.4"></script> -->
 
 	<script>
 
-		var map = L.map('map').setView([55, -1], 6);
+	var map = L.map('map').setView([55, -1], 6);
 
-        var layer = L.mapbox.tileLayer('pilipolio.hk5c0mk3').addTo(map);
-
-        $.each( artists, function( index, artist ){
-            console.log(artist);
- 
-            var artistIcon = L.icon({
-                iconUrl: artist.image,
-                iconRetinaUrl: artist.image,
-                iconSize: [75, 75],
-                iconAnchor: [37, 37],
-                popupAnchor: [-3, -76]
-            });
-
-            L.marker([artist.lat, artist.lng],
-                {icon: artistIcon,
-                 title: artist.name}).addTo(map);
-        });
-        
-        // counties as geojson
+    var layer = L.mapbox.tileLayer('pilipolio.hk5c0mk3').addTo(map);
+    //var layer = new L.StamenTileLayer("toner");
+    
+    // counties as geojson
     var geojson;
     
     function resetHighlight(e) {
@@ -66,7 +53,7 @@
     }
 
     geojson = L.geoJson(counties, {
-        style: style,
+        style: areaStyler.getAreaStyle.bind(areaStyler),
         onEachFeature: onEachFeature}).addTo(map)
         
     // info on hovering
@@ -89,6 +76,29 @@
 
     info.addTo(map);
 
+    // artists's marker
+    $.each( artists, function( index, artist ){
+        console.log("Set marker for" + artist.name);
+
+        var artistIcon = L.icon({
+            iconUrl: artist.image,
+            iconRetinaUrl: artist.image,
+            iconSize: [75, 75],
+            iconAnchor: [37, 37],
+            popupAnchor: [-3, -76]
+        });
+
+        var marker = L.marker(
+            [artist.lat, artist.lng],
+            {icon: artistIcon, title: artist.name}).addTo(map)
+        marker.on('click', function (e)
+            {
+                console.log("Clicked on marker for " + artist.name)
+                areaStyler.propertyKey = artist.name
+                
+                geojson.setStyle(areaStyler.getAreaStyle.bind(areaStyler))
+            })
+    });
 	</script>
 </body>
 </html>

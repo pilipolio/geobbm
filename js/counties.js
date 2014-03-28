@@ -12,39 +12,47 @@ function drawTable(tbody, countyProperties) {
         td = tr.insertCell(tr.cells.length);
         td.innerHTML = key;
         td = tr.insertCell(tr.cells.length);
-        td.innerHTML = value;
+        td.innerHTML = value.toFixed(1);
         td.setAttribute("align", "center");
-        }
+    }
 }
 
 function getColor(d) {
-    return d > 1000 ? '#800026' :
-           d > 500  ? '#BD0026' :
-           d > 200  ? '#E31A1C' :
-           d > 100  ? '#FC4E2A' :
-           d > 50   ? '#FD8D3C' :
-           d > 20   ? '#FEB24C' :
-           d > 10   ? '#FED976' :
+    return d > 25 ? '#800026' :
+           d > 10  ? '#BD0026' :
+           d > 5  ? '#E31A1C' :
+           d > 1  ? '#FC4E2A' :
+           d < 1   ? '#FD8D3C' :
+           d < 5   ? '#FEB24C' :
+           d < 10   ? '#FED976' :
                       '#FFEDA0';
 }
 
-function style(feature) {
-    return {
-        fillColor: getColor(feature.properties.Oasis),
-        weight: 2,
-        opacity: 1,
-        color: 'black',
-        dashArray: '3',
-        fillOpacity: 0.7
-    };
-}
+
+// global styler for geojson areas
+var areaStyler = {
+    // The feature property's key whom value will be use for coloring. 
+    propertyKey: "NOT_SET",
+    getAreaStyle: function(feature) {
+        console.log("set feature's style with key = " + this.propertyKey)
+        return {
+            fillColor: this.propertyKey in feature.properties ? getColor(feature.properties[this.propertyKey]) : 'grey',
+            weight: 2,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.7
+        };
+    }
+};
+
 
 function highlightFeature(e) {
     var layer = e.target;
 
     layer.setStyle({
         weight: 5,
-        color: '#666',
+        //color: '#666',
         dashArray: '',
         fillOpacity: 0.7
     });

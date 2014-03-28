@@ -39,11 +39,13 @@ def get_artist_image_from_bbm(artist_name, size="original"):
 import urllib2
 import datetime
 
-def query_geo_stream_logs(artist_name, size=1000):
+def query_geo_stream_logs(artist_name, size=1000, ndays=1):
     """ Query logstash for a given artist
     """
-    # could have several days as in logstash-2014.03.25,logstash-2014.03.24
-    logstash_url = 'http://logs.blinkboxmusic.com:9200/logstash-{:%Y.%m.%d},logstash-{:%Y.%m.%d}/_search?pretty'.format(datetime.datetime.now(), datetime.datetime.now() - datetime.timedelta(days=1))
+    past_days = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(ndays)]
+    logstash_url = 'https://logs.blinkboxmusic.com/{csv_days}/_search?pretty'.format(
+        csv_days=",".join("logstash-{:%Y.%m.%d}".format(d) for d in past_days))
+
     with open("logstash_query.json") as f:
         logstash_query = json.load(f)
 
@@ -54,6 +56,7 @@ def query_geo_stream_logs(artist_name, size=1000):
     # Replace artist filter in the template
     logstash_query['query']['filtered']['query']['bool']['must'][0]['query_string']['query'] = u'stream_ARTIST_lookup.raw:"{artist_name}"'.format(artist_name=artist_name)
     logstash_query['size'] = size
-    u = urllib2.urlopen(logstash_url, data=json.dumps(logstash_query))
+    u = urllib2.urlopen(logstash_url, data=json.dumps(logstash_query), timeout=60 * 60)
+
     logs = json.load(u.fp)
     return (l['fields'] for l in logs['hits']['hits'])
