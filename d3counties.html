@@ -12,6 +12,8 @@
 	<script src="data/uk_multi_polygons_250.json"></script>
 	<script src="data/counties_simp250.json"></script>
 
+    <h3 id="proj_name"> Mercator </h3>
+
 	<script>
     var width = 300,
         height = 600;
@@ -25,6 +27,9 @@
         "alberts": d3.geo.albers().center([0, 55.4]).rotate([4.4, 0]).parallels([50, 60])
         }
     
+    // global variable
+    var carrousel_index = 0;
+
     //oldDrawAccordingToProjection(svg, ".county", projections.alberts, counties)    
     //var countiesFeatures = counties.features
 
@@ -34,13 +39,21 @@
         .data(countiesFeatures)
         .enter().append("path");
         
-    var featurePaths = drawAccordingToProjection(projections.alberts, counties, featurePaths).attr("class","countyA");
+    var featurePaths = drawAccordingToProjection(projections.alberts, counties, featurePaths).attr("class", "mercator");
     
     svg.on("click", function(d) { 
-        //d3.selectAll("path").remove()
+        console.log("Old carrousel_index = " + carrousel_index)
+        carrousel_index = (carrousel_index + 1) % Object.keys(projections).length
+        console.log("New carrousel_index = " + carrousel_index)
+
+        var projName = Object.keys(projections)[carrousel_index]
+        var proj = projections[projName]
+
+        console.log("proj " + projName + " = " + proj)
+
         featurePaths = featurePaths.transition()
-        featurePaths = drawAccordingToProjection(projections.mercator, counties, featurePaths).attr("class","countyB")
-            .duration(2000) // this is 1s
+        featurePaths = drawAccordingToProjection(proj, counties, featurePaths).attr("class", projName)
+            .duration(2000)
             .delay(100)
             .ease('linear')
     })

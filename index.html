@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Homemade counties map</title>
+	<title>Geo-coded artists</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet" href="css/leaflet.css" />
 	<link rel="stylesheet" href="css/counties.css" />
+
 </head>
 <body>
-	<div id="map" style="width: 600px; height: 400px"></div>
+	<div id="map" style="width: 1200px; height: 800px"></div>
 
-	<script src="js/leaflet.js"></script>
-	<script src="js/counties.js"></script>
-	<script src="data/us-states.js"></script>
+
+	<script src="data/geocoded_artists.json"></script>
 	<script src="data/artist_by_counties.json"></script>
+
+
+	<script src="js/counties.js"></script>
+	<script src="js/jquery-1.9.0.js"></script>
+	<script src="js/leaflet.js"></script>
     <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
+    
+    <!-- <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.2.4"></script> -->
 
 	<script>
 
-    //https://www.ordnancesurvey.co.uk/opendatadownload/products.html
-    //http://www.ukpostcode.net/shapefile-of-uk-administrative-counties-wiki-16.html
-    //ogr2ogr.exe -t_srs WGS84 -f GeoJSON d:\geobbm\data\Map_UK.json d:\geobbm\data\Map_UK.shp
-    var map = L.map('map').setView([55, 0], 5);
+	var map = L.map('map').setView([55, -1], 6);
 
     var layer = L.mapbox.tileLayer('pilipolio.hk5c0mk3').addTo(map);
-
+    //var layer = new L.StamenTileLayer("toner");
+    
+    // counties as geojson
     var geojson;
     
     function resetHighlight(e) {
@@ -47,11 +53,12 @@
     }
 
     geojson = L.geoJson(counties, {
-        style: style,
+        style: areaStyler.getAreaStyle.bind(areaStyler),
         onEachFeature: onEachFeature}).addTo(map)
         
     // info on hovering
     var info = L.control();
+
     info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
         this.update();
@@ -69,6 +76,29 @@
 
     info.addTo(map);
 
+    // artists's marker
+    $.each( artists, function( index, artist ){
+        console.log("Set marker for" + artist.name);
+
+        var artistIcon = L.icon({
+            iconUrl: artist.image,
+            iconRetinaUrl: artist.image,
+            iconSize: [75, 75],
+            iconAnchor: [37, 37],
+            popupAnchor: [-3, -76]
+        });
+
+        var marker = L.marker(
+            [artist.lat, artist.lng],
+            {icon: artistIcon, title: artist.name}).addTo(map)
+        marker.on('click', function (e)
+            {
+                console.log("Clicked on marker for " + artist.name)
+                areaStyler.propertyKey = artist.name
+                
+                geojson.setStyle(areaStyler.getAreaStyle.bind(areaStyler))
+            })
+    });
 	</script>
 </body>
 </html>

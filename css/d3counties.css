@@ -1,2 +1,3 @@
-.countyA { fill: red; fill-opacity: .5;}
-.countyB { fill: blue; fill-opacity: .5;}
+.county { fill-opacity: .5; }
+.mercator { fill: red; fill-opacity: .5;}
+.alberts { fill: blue; fill-opacity: .5;}

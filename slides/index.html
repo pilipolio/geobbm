@@ -28,6 +28,10 @@
 
   <!-- Required Modernizr file -->
   <script src="modernizr.custom.js"></script>
+
+  <!-- For d3 viz -->
+  <link rel="stylesheet" href="/css/d3counties.css" />
+
 </head>
 <body>
   <div class="deck-container">
@@ -42,20 +46,20 @@
         <h2> Web mapping ten years ago </h2>
         <table>
             <tr>
-              <td style="width:600px">
+              <td style="width:800px">
              <h3> Geomatics </h3>
               <ul>
-                <li> Few open data </li>
+                <li> Scarce open data </li>
                 <li> Heavy weights standards </li>
                 <li> A few proprietary stacks </li>
                 <li> Java/Flash based interactivity</li>
               </ul>
 
-             <h3> Hard to publish maps </h3>
+             <h3> Not for single developper/small companies </h3>
               
               </td>
-              <td style="width:600px" align="center">
-                <img src="http://atschool.eduweb.co.uk/southwold/event/kingswood/kw_map.gif">
+              <td style="width:800px" align="center">
+                <img src="http://atschool.eduweb.co.uk/southwold/event/kingswood/kw_map.gif" height="75%" width="75%">
               </td>
             </tr>
         </table>
@@ -64,7 +68,7 @@
     <section class="slide">
         <h2> 2005 : Google Maps </h2>
         <table>
-            <tr><td style="width:600px">
+            <tr><td style="width:800px">
         <ul>
             <li>  <h3> Google philosophy </h3> </li>
               <ul>
@@ -79,7 +83,7 @@
               </ul>
          </ul>
          </td>
-         <td style="width:600px" align="center">
+         <td style="width:800px" align="center">
                 <img src="http://www.w3.org/2010/Talks/11-11-steven-applications/googlemaps.png">
           </td>
         </tr>
@@ -88,9 +92,16 @@
 
     <section class="slide">
         <h2> Tile pyramid </h2>
-        <h3> Based on OGC WMS standard  </h3>
-        <h4>http://mts0.google.com/vt/&z={LEVEL}&x={X}&y={Y}</h4>
-        <img src="http://www.intechopen.com/source/html/38302/media/TilePyramid.jpg" height="40%" width="40%">
+        <h3> Based on OGC WMS standard </h3>
+        <h3> http://mts0.google.com/vt/&z={LEVEL}&x={X}&y={Y} </h3>
+        <table>
+            <tr>
+            <td ><img src="http://www.intechopen.com/source/html/38302/media/TilePyramid.jpg" height="40%" width="40%"></td>
+            <td style="width:400px"><img src="http://mts0.google.com/vt/&z=0&x=0&y=0">
+            </tr>
+        </table>
+        
+ 
     </section>
 
     <section class="slide">
@@ -102,7 +113,8 @@
             </li>            
             <li><h3> Key component to Google's strategy </h3>
             " In 50 years, Google will be the self-driving car company […]
-            and, oh, P.S. they still have a search engine somewhere. ", Robin Sloane.
+            and, oh, P.S. they still have a search engine somewhere. ",
+            <p>Robin Sloane.</p>
             </li>
         </ul>
     </section>
@@ -128,19 +140,26 @@
       <h2> Open tile servers </h2>
 
         <table>
-            <tr><td style="width:600px">
+            <tr><td style="width:800px">
         <ul>
-            <li>  <h3> openstreetmap.org </h3> </li>
-            <li>  <h3> mapbox.com </h3> </li>
-            <li>  <h3> maps.stamen.com </h3> </li>
+            <li> <h3> openstreetmap.org </h3> </li>
+            Demonstrating the osm database
+
+            <li>  <h3> mapbox.com </h3>
+            Greate styling possibility : "Map of the Dead"
+            </li>
+
+            <li><h3> maps.stamen.com </h3>
+            Also provide maps for Pinterest, ... and various organizations
+            </li>
          </ul>
          </td>
          <td style="width:300px" align="center">
             <img src="http://c.tile.openstreetmap.org/15/16274/10863.png">
-            <img src="http://b.tiles.mapbox.com/v3/jeffmerrick.map-tnw3k3na/15/16274/10863.png">
+            <img src="http://tile.stamen.com/watercolor/15/16274/10863.jpg">
           </td>
          <td style="width:300px" align="center">
-            <img src="http://tile.stamen.com/watercolor/15/16274/10863.jpg">
+            <img src="http://b.tiles.mapbox.com/v3/jeffmerrick.map-tnw3k3na/15/16274/10863.png">
             <img src="http://tile.stamen.com/toner/15/16274/10863.jpg" title"http://tile.stamen.com/toner/15/16274/10863.jpg">
           </td>
         </tr>
@@ -150,11 +169,20 @@
     <section class="slide">
       <h2> JavaScript APIs </h2>
         <ul>
-            <li><h3> Slippy map + vectorial overlays  </h3></li>
-            <li><h3> Mostly SVG based, using more and more html5 Canvas </h3></li>
-            <li><h3> From the simplest to the most complex </h3></li>
+            <li><h3> Slippy map </h3>
+            Background information as raster : scalable
+            <p> OGC WMS + tiles </p>
+            </li>
+            <li><h3> Vector overlays </h3>
+            Detailled information, interactivity : not scalable
+            <p> SVG to html5 Canvas</p> 
+            </li>
+            <li><h3> From the simplest to the most complex </h3>
             ModestMaps, MapBoxApi, LeafLet, OpenLayers
-            <li><h3> Also possible to go vectorial/SVG all the way with d3.js  </h3></li>
+            </li>
+            <li><h3> Also possible to go vector/SVG all the way </h3>
+            d3.js, raphaeljs with Kartograph
+            </li>
         <ul>
     </section>
 
@@ -174,21 +202,99 @@
     <section class="slide">
       <h2> First visualisation </h2>
 
+        <table>
+            <tr><td style="width:800px">
         <ul>
-            <li><h3> Artists' begin areas from http://musicbrainz.org <h3></li>
-            <li><h3> Map of british counties <h3></li>
-            <li><h3> Geolocalized streams from logstash <h3></li>
-            queried by artist then grouped by counties
-            <li><h3> LeafLet powered map <h3></li>
+            <li><h3> Artists' begin areas </h3>
+            from musicbrainz.org API
+            </li>
+            <li><h3> Geolocalized streams from <a href="https://logs.blinkboxmusic.com/#/dashboard/elasticsearch/Stream%20Summary"> BBM logstash </a>
+             </h3></li>
+            decorated with artist name
+            <li><h3> Map of british counties </h3>
+            From shapefile, joined with streams, exported to geojson
+            </li>
+            <li><h3> LeafLet powered <a href="/geoartists.html"> map </a> </h3></li>
+            Wire-in some interactivity on click/hover
         </ul>
+                <img src="images/kibana.png">
+
+         </td>
+         <td style="width:800px" align="center">
+                <img src="images/geoartists.png">
+          </td>
+        </tr>
+        </table>
+
     </section>
 
     <section class="slide">
       <h2> Another visualisation  </h2>
-          <p> Purely based on d3.js </p>
-          <p> Merged and simplified and  the counties together </p>
-          <p> Benefit from the built-in transition facilities of d3.js </p>
-          https://github.com/mbostock/d3/wiki/Transitions#d3_ease
+        <table>
+            <tr><td style="width:800px">
+
+        <ul>
+            <li><h3> "Rebuild" UK from counties </h3>
+            </li>
+
+            <li><h3> Purely SVG using d3.js </h3>
+            Handle projections, Styling using css
+            </li>
+
+            <li><h3> Low-level API, but... </h3>
+            </li>
+
+        </ul>
+
+         </td>
+         <td id="d3viz" style="width:800px" align="center">
+         <h3 id="proj_name"> Albers projection </h3>
+                
+	<script src="/js/d3.min.js"></script>
+	<script src="/js/d3counties.js"></script>
+	<script src="/data/uk_multi_polygons_250.json"></script>
+	<script src="/data/counties_simp250.json"></script>
+
+	<script>
+    var width = 800,
+        height = 800;
+
+    var svg = d3.select("#d3viz").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var projections = {
+        "mercator": d3.geo.mercator(),
+        "alberts": d3.geo.albers().center([0, 55.4]).rotate([4.4, 0]).parallels([50, 60])
+        }
+    
+    //oldDrawAccordingToProjection(svg, ".county", projections.alberts, counties)    
+    //var countiesFeatures = counties.features
+
+    var counties = uk
+    var countiesFeatures = [uk]
+    var featurePaths = svg.selectAll(".county")
+        .data(countiesFeatures)
+        .enter().append("path");
+        
+    var featurePaths = drawAccordingToProjection(projections.alberts, counties, featurePaths).attr("class","alberts");
+    
+    svg.on("click", function(d) { 
+        d3.select("#proj_name").text("Mercator projection")
+        featurePaths = featurePaths.transition()
+        featurePaths = drawAccordingToProjection(projections.mercator, counties, featurePaths).attr("class","mercator")
+            .duration(2000) // this is 1s
+            .delay(100)
+            .ease('linear')
+    })
+    
+	</script>
+
+            <!-- <img src="images/d3counties.png"> -->
+          </td>
+        </tr>
+        </table>
+
     </section>
 
     <!-- End slides. -->
